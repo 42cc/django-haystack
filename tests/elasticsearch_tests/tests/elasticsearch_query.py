@@ -19,6 +19,10 @@ class ElasticsearchSearchQueryTestCase(TestCase):
         self.sq.add_filter(SQ(content='hello'))
         self.assertEqual(self.sq.build_query(), '(hello)')
 
+    def test_regression_slash_search(self):
+        self.sq.add_filter(SQ(content='hello/'))
+        self.assertEqual(self.sq.build_query(), '(hello\\/)')
+
     def test_build_query_boolean(self):
         self.sq.add_filter(SQ(content=True))
         self.assertEqual(self.sq.build_query(), '(True)')
@@ -103,7 +107,7 @@ class ElasticsearchSearchQueryTestCase(TestCase):
     def test_clean(self):
         self.assertEqual(self.sq.clean('hello world'), 'hello world')
         self.assertEqual(self.sq.clean('hello AND world'), 'hello and world')
-        self.assertEqual(self.sq.clean('hello AND OR NOT TO + - && || ! ( ) { } [ ] ^ " ~ * ? : \ world'), 'hello and or not to \\+ \\- \\&& \\|| \\! \\( \\) \\{ \\} \\[ \\] \\^ \\" \\~ \\* \\? \\: \\\\ world')
+        self.assertEqual(self.sq.clean('hello AND OR NOT TO + - && || ! ( ) { } [ ] ^ " ~ * ? : \ / world'), 'hello and or not to \\+ \\- \\&& \\|| \\! \\( \\) \\{ \\} \\[ \\] \\^ \\" \\~ \\* \\? \\: \\\\ \\/ world')
         self.assertEqual(self.sq.clean('so please NOTe i am in a bAND and bORed'), 'so please NOTe i am in a bAND and bORed')
 
     def test_build_query_with_models(self):
